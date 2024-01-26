@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(mostra_img)
+project(file_quaternion_publisher)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -30,16 +30,16 @@ find_package(Eigen3 3.1.0 REQUIRED)
 include_directories(include ${rclcpp_INCLUDE_DIRS} ${sensor_msgs_INCLUDE_DIRS} ${cv_bridge_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
 
 
-add_executable(mostra_img src/mostra_img.cpp)
-target_include_directories(mostra_img PUBLIC
+add_executable(file_quaternion_publisher src/file_quaternion_publisher.cpp)
+target_include_directories(file_quaternion_publisher PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 
-ament_target_dependencies(mostra_img rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
+ament_target_dependencies(file_quaternion_publisher rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
 
 
 
-install(TARGETS mostra_img
+install(TARGETS file_quaternion_publisher
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
