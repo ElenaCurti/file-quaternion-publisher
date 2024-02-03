@@ -7,6 +7,14 @@
 #include <fstream>
 #include <iostream>
 #include <Eigen/Dense>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <cmath>
+#include <cstdlib>
+
+double degreesToRadians(double degrees) {
+    return degrees * (M_PI / 180.0);
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -35,11 +43,15 @@ int main(int argc, char *argv[])
     }
 
     auto quaternion_pub = node->create_publisher<nav_msgs::msg::Odometry>("odom/prova", 10);
+    auto quaternion_pub_original = node->create_publisher<nav_msgs::msg::Odometry>("odom/original", 10);
 
     // Read the file line by line
     std::cout << "Apri rviz2 e sottoscriviti a odom/prova. Il frame_id e' map. Poi premi un tasto qui per continuare..." << std::endl;
+    system("rviz2 -d visualizza_odom.rviz  >/dev/null 2>/dev/null  & ");
+    rclcpp::sleep_for(std::chrono::milliseconds(5*1000));
+
     std::string line;
-    std::cin.get();
+    //std::cin.get();
 
     while (std::getline(file, line)) {
         // Use std::istringstream to separate values
@@ -58,18 +70,47 @@ int main(int argc, char *argv[])
 
         geometry_msgs::msg::Pose output_pose{};
 
+        output_pose.position.x = twc(0);
+        output_pose.position.y = twc(2);
+        output_pose.position.z = 0 ;
+
         output_pose.orientation.x = q.x();
         output_pose.orientation.y = q.y();
         output_pose.orientation.z = q.z();
         output_pose.orientation.w = q.w();
 
-        output_pose.position.x = twc(0);
-        output_pose.position.y = twc(2);
-        output_pose.position.z = 0 ;
-
         message.pose.pose = output_pose;
         
-        quaternion_pub->publish(message);
+        quaternion_pub_original->publish(message);
+
+
+        // Nuovo messaggio con quat ruotato
+        auto message2 = nav_msgs::msg::Odometry();
+        message2.header.frame_id = "map";
+
+        geometry_msgs::msg::Pose output_pose_ruotato{}; 
+        output_pose_ruotato.position.x = twc(0);
+        output_pose_ruotato.position.y = twc(2);
+        output_pose_ruotato.position.z = 0 ;
+
+        // Ruotiamo il quaternion
+        
+        tf2::Quaternion tf2_quat;
+        tf2::fromMsg(output_pose.orientation, tf2_quat);
+        std::cout   << "\t" << output_pose.orientation.x << " " <<  output_pose.orientation.y << " " <<  output_pose.orientation.z  << " " <<  output_pose.orientation.w  << std::endl;
+        //std::cout   << "\t" << tf2_quat_from_msg.getX() << " " <<  tf2_quat_from_msg.getY() << " " <<  tf2_quat_from_msg.getZ()  << " " <<  tf2_quat_from_msg.getW()  << std::endl;
+        tf2_quat.setRPY( 0.0, 0.0, degreesToRadians(90));
+        output_pose_ruotato.orientation = tf2::toMsg(tf2_quat);
+
+        message2.pose.pose = output_pose_ruotato;
+
+        quaternion_pub->publish(message2);
+
+
+
+        
+
+        
 
 
         
