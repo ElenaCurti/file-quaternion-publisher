@@ -9,11 +9,13 @@
 #include <Eigen/Dense>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <cmath>
+#include <tf2_ros/transform_broadcaster.h>
 #include <cstdlib>
 
 double degreesToRadians(double degrees) {
     return degrees * (M_PI / 180.0);
 }
+
 
 
 int main(int argc, char *argv[])
@@ -24,14 +26,22 @@ int main(int argc, char *argv[])
   auto node = std::make_shared<rclcpp::Node>("odometry_publisher");
 
   if (argc <= 1) {
-    std::cerr << "Usage: ros2 run file_quaternion_publisher file_quaternion_publisher /path/to/file_with_quaternions.txt" << std::endl;
+    std::cerr << "Usage: ros2 run file_quaternion_publisher file_quaternion_publisher /path/to/file_with_quaternions.txt [tempo_sleep]" << std::endl;
     std::cerr << "Il file da fornire e' quello restituito da orbslam alla fine dell'esecuzione (f_nome.txt). "<<  
                  "Deve contenere N righe con N=numero immagini processate. Ogni riga contiene le seguenti 8 colonne separate da spazi:" <<
-                 "un valore che viene scartato,\n position x, position y, position z, quaternion x, quaternion y, quaternion z, quaternion w.   \n" << std::endl;
+                 "un valore che viene scartato,\n position x, position y, position z, quaternion x, quaternion y, quaternion z, quaternion w.   \n"<<
+                 "\ttempo_sleep e la distanza (in millisecondi) tra una pubblicazione di un'odometry e la successiva. Default: 100.' " << std::endl;
     return 1;
   }
-
   std::string file_path = argv[1];
+
+  // Tempo sleep:
+  int tempo_sleep=100;
+  if (argc==3){
+    tempo_sleep = atoi(argv[2]);
+  }
+  std::cout << "tempo_sleep: " << tempo_sleep << std::endl;
+
 
   // Open the file
   std::ifstream file(file_path);
@@ -48,6 +58,7 @@ int main(int argc, char *argv[])
 
   system("rviz2 -d visualizza_odom.rviz  >/dev/null 2>/dev/null  & ");
   rclcpp::sleep_for(std::chrono::milliseconds(5*1000));
+
 
   std::string line;
   // Read the file line by line
@@ -69,7 +80,7 @@ int main(int argc, char *argv[])
 
     output_pose.position.x = twc(0);
     output_pose.position.y = twc(2);
-    output_pose.position.z = 0 ;
+    output_pose.position.z = 0;
 
     output_pose.orientation.x = q.x();
     output_pose.orientation.y = q.y();
@@ -84,10 +95,24 @@ int main(int argc, char *argv[])
     auto message2 = nav_msgs::msg::Odometry();
     message2.header.frame_id = "map";
 
+float roll2 = 1.5707, pitch2 = 0, yaw2 = 0.707;    
+    q = Eigen::AngleAxisf(roll2, Eigen::Vector3f::UnitX())
+    * Eigen::AngleAxisf(pitch2, Eigen::Vector3f::UnitY())
+    * Eigen::AngleAxisf(yaw2, Eigen::Vector3f::UnitZ());
+  std::cout << "Quaternion" << std::endl << q.coeffs() << std::endl;
+
+
     geometry_msgs::msg::Pose output_pose_ruotato{}; 
     output_pose_ruotato.position.x = twc(0);
-    output_pose_ruotato.position.y = twc(2);
-    output_pose_ruotato.position.z = 0 ;
+    output_pose_ruotato.position.y = twc(1);
+    output_pose_ruotato.position.z = twc(2);
+
+
+    output_pose_ruotato.orientation.x = q.x();
+    output_pose_ruotato.orientation.y = q.y();
+    output_pose_ruotato.orientation.z = q.z();
+    output_pose_ruotato.orientation.w = q.w();
+
 
     
     // Copiamo il quaternione
@@ -103,14 +128,14 @@ int main(int argc, char *argv[])
     std::cout   << "\t" << roll << " " << pitch << " " << yaw << std::endl;
 
     // Ruotiamo e pubblichiamo il nuovo quaternione
-    tf2_quat.setRPY( 0.0, 0.0, yaw+degreesToRadians(90));
+    //tf2_quat.setRPY(0,0, pitch-degreesToRadians(45));
 
-    output_pose_ruotato.orientation = tf2::toMsg(tf2_quat);
+    //output_pose_ruotato.orientation = tf2::toMsg(tf2_quat);
     message2.pose.pose = output_pose_ruotato;
     quaternion_pub->publish(message2);
 
     // Sleep for a short duration (adjust as needed)
-    rclcpp::sleep_for(std::chrono::milliseconds(10));
+    rclcpp::sleep_for(std::chrono::milliseconds(tempo_sleep));
   }
 
   // Close the file
