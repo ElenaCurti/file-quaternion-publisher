@@ -29,7 +29,7 @@ find_package(Eigen3 3.1.0 REQUIRED)
 # find_package(<dependency> REQUIRED)
 include_directories(include ${rclcpp_INCLUDE_DIRS} ${sensor_msgs_INCLUDE_DIRS} ${cv_bridge_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
 
-
+# Script da file a ROS2 
 add_executable(file_quaternion_publisher src/file_quaternion_publisher.cpp)
 target_include_directories(file_quaternion_publisher PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -37,10 +37,45 @@ target_include_directories(file_quaternion_publisher PUBLIC
 
 ament_target_dependencies(file_quaternion_publisher rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
 
-
-
 install(TARGETS file_quaternion_publisher
   DESTINATION lib/${PROJECT_NAME})
+
+# Da IMU come messaggio ROS2  a file csv
+# add_executable(form_imu_msg_to_csv src/form_imu_msg_to_csv.cpp)
+# target_include_directories(form_imu_msg_to_csv PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>)
+
+# ament_target_dependencies(form_imu_msg_to_csv rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
+
+# install(TARGETS form_imu_msg_to_csv
+#   DESTINATION lib/${PROJECT_NAME})
+
+# Estrattore da immagini e imu con ROS2 a file PNG e csv 
+add_executable(from_ros2_images_imu_to_png_csv src/from_ros2_images_imu_to_png_csv.cpp)
+target_include_directories(from_ros2_images_imu_to_png_csv PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+ament_target_dependencies(from_ros2_images_imu_to_png_csv rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
+
+install(TARGETS from_ros2_images_imu_to_png_csv
+  DESTINATION lib/${PROJECT_NAME})
+
+
+# Check no perdita messaggi 
+# add_executable(check_no_perdita_messaggi src/check_no_perdita_messaggi.cpp)
+# target_include_directories(check_no_perdita_messaggi PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>)
+
+# ament_target_dependencies(check_no_perdita_messaggi rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
+
+#install(TARGETS check_no_perdita_messaggi
+#  DESTINATION lib/${PROJECT_NAME})
+
+
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
