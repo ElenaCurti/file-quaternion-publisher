@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
   auto quaternion_pub_original = node->create_publisher<nav_msgs::msg::Odometry>("odom/original", 10);
   auto quaternion_pub = node->create_publisher<nav_msgs::msg::Odometry>("odom/prova", 10);
 
-  system("rviz2 -d visualizza_odom.rviz  >/dev/null 2>/dev/null  & ");
+  system("rviz2 -d visualizza_odom.rviz  >/dev/null 2>/tmp/rviz_errors.txt  & ");
   rclcpp::sleep_for(std::chrono::milliseconds(5*1000));
 
 
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     ss >> togli_primo_valore>> twc(0) >> twc(1) >> twc(2) >> q.x() >> q.y() >> q.z() >> q.w() ;
 
     auto message = nav_msgs::msg::Odometry();
-    message.header.frame_id = "map";        
+    message.header.frame_id = "track";        
 
     geometry_msgs::msg::Pose output_pose{};
 
@@ -93,19 +93,42 @@ int main(int argc, char *argv[])
 
     // Nuovo messaggio: ci copiamo la position
     auto message2 = nav_msgs::msg::Odometry();
-    message2.header.frame_id = "map";
+    message2.header.frame_id = "track";
 
-float roll2 = 1.5707, pitch2 = 0, yaw2 = 0.707;    
-    q = Eigen::AngleAxisf(roll2, Eigen::Vector3f::UnitX())
-    * Eigen::AngleAxisf(pitch2, Eigen::Vector3f::UnitY())
-    * Eigen::AngleAxisf(yaw2, Eigen::Vector3f::UnitZ());
-  std::cout << "Quaternion" << std::endl << q.coeffs() << std::endl;
+
+  // Eigen::Quaterniond orientation_quaternion;
+  // orientation_quaternion.x() = output_pose.orientation.x;
+  // orientation_quaternion.y() = output_pose.orientation.y;
+  // orientation_quaternion.z() = output_pose.orientation.z;
+  // orientation_quaternion.w() = output_pose.orientation.w;
+
+  // float roll2 = degreesToRadians(88+90), pitch2 = degreesToRadians(270), yaw2 = degreesToRadians(0); 
+  // Eigen::AngleAxisd roll_angle(roll2, Eigen::Vector3d::UnitX());
+  // Eigen::AngleAxisd pitch_angle(pitch2, Eigen::Vector3d::UnitY());
+  // Eigen::AngleAxisd yaw_angle(yaw2, Eigen::Vector3d::UnitZ());
+  // Eigen::Quaterniond rotated_quaternion = yaw_angle * pitch_angle * roll_angle * orientation_quaternion;
+
+
+  // std::cout << "Quaternion" << std::endl << q.coeffs() << std::endl;
 
 
     geometry_msgs::msg::Pose output_pose_ruotato{}; 
-    output_pose_ruotato.position.x = twc(0);
-    output_pose_ruotato.position.y = twc(2);
-    output_pose_ruotato.position.z = 0;
+
+    // double angle = 69 * M_PI / 180.0;
+    // Eigen::Matrix3f rotation_matrix;
+    // rotation_matrix << 1, 0, 0,
+    //                    0, cos(angle), -sin(angle),
+    //                    0, sin(angle), cos(angle);
+    
+    // Rotate around the x-axis
+    // twc = rotation_matrix * twc;
+
+    // Adjust z coordinate to align with the z=0 plane
+    // twc.z() -= cos(angle) * twc.y();
+
+    output_pose_ruotato.position.x = twc.z() * 10 ;
+    output_pose_ruotato.position.y = twc.x() * 10 ;
+    output_pose_ruotato.position.z = 0 ;
 
 
     output_pose_ruotato.orientation.x = q.x();
@@ -113,24 +136,27 @@ float roll2 = 1.5707, pitch2 = 0, yaw2 = 0.707;
     output_pose_ruotato.orientation.z = q.z();
     output_pose_ruotato.orientation.w = q.w();
 
+    
+
 
     
     // Copiamo il quaternione
     tf2::Quaternion tf2_quat;
-    tf2::fromMsg(output_pose.orientation, tf2_quat);
-    //std::cout   << "\t" << output_pose.orientation.x << " " <<  output_pose.orientation.y << " " <<  output_pose.orientation.z  << " " <<  output_pose.orientation.w  << std::endl;
-    //std::cout   << "\t" << tf2_quat_from_msg.getX() << " " <<  tf2_quat_from_msg.getY() << " " <<  tf2_quat_from_msg.getZ()  << " " <<  tf2_quat_from_msg.getW()  << std::endl;
+    tf2::fromMsg(output_pose_ruotato.orientation, tf2_quat);
+    // //std::cout   << "\t" << output_pose.orientation.x << " " <<  output_pose.orientation.y << " " <<  output_pose.orientation.z  << " " <<  output_pose.orientation.w  << std::endl;
+    // //std::cout   << "\t" << tf2_quat_from_msg.getX() << " " <<  tf2_quat_from_msg.getY() << " " <<  tf2_quat_from_msg.getZ()  << " " <<  tf2_quat_from_msg.getW()  << std::endl;
     
-    // Prendiamo roll, pitch e yaw del quaternione originale
+    // // Prendiamo roll, pitch e yaw del quaternione originale
     tf2::Matrix3x3 m(tf2_quat);
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
-    std::cout   << "\t" << roll << " " << pitch << " " << yaw << std::endl;
+    // // std::cout   << "\t" << roll << " " << pitch << " " << yaw << std::endl;
 
-    // Ruotiamo e pubblichiamo il nuovo quaternione
-    //tf2_quat.setRPY(0,0, pitch-degreesToRadians(45));
+    // // Ruotiamo e pubblichiamo il nuovo quaternione
+    tf2_quat.setRPY(0, 0, yaw);
+    // tf2_quat.setRPY(0,0, pitch-degreesToRadians(45));
 
-    //output_pose_ruotato.orientation = tf2::toMsg(tf2_quat);
+    output_pose_ruotato.orientation = tf2::toMsg(tf2_quat);
     message2.pose.pose = output_pose_ruotato;
     quaternion_pub->publish(message2);
 
