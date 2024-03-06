@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
   if (argc==3){
     tempo_sleep = atoi(argv[2]);
   }
-  std::cout << "tempo_sleep: " << tempo_sleep << std::endl;
+  std::cout << "PROVAtempo_sleep: " << tempo_sleep << std::endl;
 
 
   // Open the file
@@ -78,9 +78,9 @@ int main(int argc, char *argv[])
 
     geometry_msgs::msg::Pose output_pose{};
 
-    output_pose.position.x = twc(0);
-    output_pose.position.y = twc(1);
-    output_pose.position.z = twc(2);
+    output_pose.position.x = twc(0)*10;
+    output_pose.position.y = twc(1)*10;
+    output_pose.position.z = twc(2)*10;
 
     output_pose.orientation.x = q.x();
     output_pose.orientation.y = q.y();
@@ -90,6 +90,8 @@ int main(int argc, char *argv[])
     message.pose.pose = output_pose;    
     quaternion_pub_original->publish(message);
 
+
+    //std::cout << "LINE:" << twc(0) << " " << twc(1) << " " << twc(2) << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << std::endl;
 
     // Nuovo messaggio: ci copiamo la position
     auto message2 = nav_msgs::msg::Odometry();
@@ -126,9 +128,14 @@ int main(int argc, char *argv[])
     // Adjust z coordinate to align with the z=0 plane
     // twc.z() -= cos(angle) * twc.y();
 
-    output_pose_ruotato.position.x = twc.z() * 10 ;
+  
+    // Prima: x -> right.   y -> down.  z -> forward. -> EDN
+    // Ora:   x -> forward. y -> right. z -> down     -> NED
+
+    output_pose_ruotato.position.x = sqrt( twc.z()*twc.z() + twc.y() * twc.y() ) * 10 ;
+    output_pose_ruotato.position.x *= twc.z() < 0 ? -1 : 1;
     output_pose_ruotato.position.y = twc.x() * 10 ;
-    output_pose_ruotato.position.z = 0 ;
+    output_pose_ruotato.position.z = 0  ;
 
 
     output_pose_ruotato.orientation.x = q.x();

@@ -20,6 +20,14 @@ Il programma pubblica sui topics:
 - odom/original (odometry originale, contenuta nel file txt) 
 - odom/prova (nuova odometry calcolata/ruotata )
 
+## Check odometry uguale
+```
+ros2 run file_quaternion_publisher check_odometry_uguale /path/to/file_with_quaternions_effettivi.txt  /path/to/file_with_quaternions_orbslam.txt [tempo_sleep]
+```
+Primo file: quello che contiene l'odometry giusta. Secondo file: quello di orbslam. Entrambi sono nello stesso formato del file_quaternion_publisher.cpp.
+Su RVIZ2: le frecce verdi sono quelle efettive, quelle rosse sono quelle di orbslam
+tempo_sleep e' la distanza (in millisecondi) tra una pubblicazione di un'odometry e la successiva. Default: 100.
+
 ## Estrattore di immagini e imu: da ROS2 a file PNG e CSV
 ```console
 source install/local_setup.bash

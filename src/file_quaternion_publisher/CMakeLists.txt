@@ -56,11 +56,38 @@ add_executable(from_ros2_images_imu_to_png_csv src/from_ros2_images_imu_to_png_c
 target_include_directories(from_ros2_images_imu_to_png_csv PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-
 ament_target_dependencies(from_ros2_images_imu_to_png_csv rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
-
 install(TARGETS from_ros2_images_imu_to_png_csv
   DESTINATION lib/${PROJECT_NAME})
+
+# Check odometry uguale 
+add_executable(check_odometry_uguale src/check_odometry_uguale.cpp)
+target_include_directories(check_odometry_uguale PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+ament_target_dependencies(check_odometry_uguale rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
+install(TARGETS check_odometry_uguale
+  DESTINATION lib/${PROJECT_NAME})
+
+# # Pubblica tempo
+# add_executable(publish_time src/publish_time.cpp)
+# target_include_directories(publish_time PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>)
+# ament_target_dependencies(publish_time rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
+# install(TARGETS publish_time
+#   DESTINATION lib/${PROJECT_NAME})
+
+
+
+# # Mostra immagini
+# add_executable(show_images src/show_images.cpp)
+# target_include_directories(show_images PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>)
+# ament_target_dependencies(show_images rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
+# install(TARGETS show_images
+#   DESTINATION lib/${PROJECT_NAME})
 
 
 # Check no perdita messaggi 
