@@ -34,13 +34,9 @@ source install/local_setup.bash
 ros2 run file_quaternion_publisher from_ros2_images_imu_to_png_csv
 ```
 
-Si sottoscrive a <b>/camera/left_image</b> e estrae le immagini in una cartella.
-
-<b>NB</b>: Il timestamp che viene assegnato alle immagini e' quello "corrente" (cioe' il timestamp preso al momento dell'estrazione), NON quello contenuto nell'header dei messaggi ros. <br>
+Si sottoscrive alla camera sinistra e alla destra e estrae le immagini nelle cartelle "left" e  "right".
 
 Si sottoscrive a <b>/imu/data</b> e ne estrae i dati in un file csv del tipo
 ```console
 # Timestamp,Angular Velocity X,Angular Velocity Y,Angular Velocity Z,Linear Acceleration X,Linear Acceleration Y,Linear Acceleration Z
 ```
-<b>NB</b>: Il timestamp di questo file e', come prima, quello "corrente". Per fare il match con il timestamp originale contenuto nell'header dei messaggi, viene creato il file <i>imu_matching_original_timestamp.csv</i> . In questo file la prima colonna e' il timestamp originale, mentre nella seconda c'e' quello "corrente". 
-
