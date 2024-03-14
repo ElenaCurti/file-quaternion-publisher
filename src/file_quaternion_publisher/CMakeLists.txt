@@ -23,6 +23,9 @@ find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(Eigen3 3.1.0 REQUIRED)
+find_package(tf2_ros REQUIRED)  
+find_package(tf2_geometry_msgs REQUIRED)
+
 
 # uncomment the following section in order to fill in
 # further dependencies manually.
@@ -69,14 +72,69 @@ ament_target_dependencies(check_odometry_uguale rclcpp sensor_msgs cv_bridge Ope
 install(TARGETS check_odometry_uguale
   DESTINATION lib/${PROJECT_NAME})
 
-# # Pubblica tempo
-# add_executable(publish_time src/publish_time.cpp)
-# target_include_directories(publish_time PUBLIC
+# Estrattore odometry
+add_executable(odometry_to_file src/odometry_to_file.cpp)
+target_include_directories(odometry_to_file PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+ament_target_dependencies(odometry_to_file rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
+install(TARGETS odometry_to_file
+  DESTINATION lib/${PROJECT_NAME})
+  
+
+# Pubblicare orbslam pose as tf 
+add_executable(publish_tf_orbslam src/publish_tf_orbslam.cpp)
+target_include_directories(publish_tf_orbslam PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+ament_target_dependencies(publish_tf_orbslam rclcpp sensor_msgs cv_bridge OpenCV nav_msgs tf2_ros tf2_geometry_msgs)
+install(TARGETS publish_tf_orbslam
+  DESTINATION lib/${PROJECT_NAME})
+
+  
+
+
+#---------------------------- Convertitore tf ----------------------------
+
+
+# add_executable(tf_converter src/tf_converter.cpp)
+# target_include_directories(tf_converter PUBLIC
 #   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 #   $<INSTALL_INTERFACE:include>)
-# ament_target_dependencies(publish_time rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
-# install(TARGETS publish_time
+# ament_target_dependencies(tf_converter 
+#   rclcpp sensor_msgs cv_bridge OpenCV nav_msgs tf2_ros tf2_geometry_msgs)
+
+# find_library(TF2_LIBRARY tf2)
+# if(NOT TF2_LIBRARY)
+#     message(FATAL_ERROR "tf2 library not found")
+# endif()
+
+# find_library(TF2_ROS_LIBRARY tf2_ros)
+# if(NOT TF2_ROS_LIBRARY)
+#     message(FATAL_ERROR "tf2_ros library not found")
+# endif()
+
+# find_library(TF2_GEOMETRY_MSGS_LIBRARY tf2_geometry_msgs)
+# if(NOT TF2_GEOMETRY_MSGS_LIBRARY)
+#     message(FATAL_ERROR "tf2_geometry_msgs library not found")
+# endif()
+
+# target_link_libraries(tf_converter
+#   ${TF2_LIBRARY}
+#   ${TF2_ROS_LIBRARY}
+#   ${TF2_GEOMETRY_MSGS_LIBRARY})
+  
+# install(TARGETS tf_converter
 #   DESTINATION lib/${PROJECT_NAME})
+
+# # Pubblica tempo
+add_executable(publish_time src/publish_time.cpp)
+target_include_directories(publish_time PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+ament_target_dependencies(publish_time rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
+install(TARGETS publish_time
+  DESTINATION lib/${PROJECT_NAME})
 
 
 
