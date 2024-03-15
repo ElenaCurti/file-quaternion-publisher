@@ -30,20 +30,35 @@ tempo_sleep e' la distanza (in millisecondi) tra una pubblicazione di un'odometr
 
 
 
-## Tf transform
+## TF messages
 ```
 ros2 run file_quaternion_publisher publish_tf_orbslam /path/to/file_with_quaternions.txt [tempo_sleep]
 ```
 
-Il default del tempo_sleep e' 50 millisecondi (quindi rate di 20 hz come l'odometry di fastlio).
+Questo script pubblica l'odometry (sul topic <i>/odom_orbslam</i>) calcolata da orbslam ed i relativi tf messages (su <i>/tf</i>). Legge il file con le odometry gia' computate, ma serve per simulare la Track di orbslam.
+
+Il default del tempo_sleep e' 70 millisecondi (quindi rate di 14 hz come le fps della zed).
 
 
 Per la bag del 7 marzo con la zed2 -> Consiglio: invece di runnare il file-quaternion-publisher da linea di comando, usa  lo script <b>esegui_tf.sh</b> che fa partire in contemporanea anche fast lio e la bag. <B> Nello script bash cambia i path. </B> FIXME ->  Lo script non viene fermato. Bisogna aspettare che termini da solo la pubblicazione di tutti i tf :') 
 
 Su un altro terminale fai  
 ```
-ros2 run tf2_ros tf2_echo fl_imu_link orbslam
+ros2 run file_quaternion_publisher tf_listener
 ```
+Questo script legge periodicamente su <i>/tf</i> e calcola la trasformazione dell'odometry di orbslam rispetto a quella di fastlio. (Idealmente dovrebbe pubblicare poi la nuova odometry su <i>/odom_tf_translated</i> ma la pubblicazione non e' corretta). Ignora le scritte iniziali che vengono stampate. 
+
+
+Su un altro terminale fai  
+```
+rviz2 -d tf_transform.rviz
+```
+Si vedra': 
+- in verde: la traiettoria di fastlio
+- in rosso: quella di orbslam (quella originale, non ruotata)
+- i tf messages
+
+FIXME: forse la pubblicazione di orbslam e quella di faslio non sono del tutto sincronizzate. La lookupTransform non si lamenta ma forse perche' non tiene conto del timestamp. 
 
 
 ## Estrattore di immagini e imu: da ROS2 a file PNG e CSV

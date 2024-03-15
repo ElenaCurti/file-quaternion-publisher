@@ -92,6 +92,22 @@ install(TARGETS publish_tf_orbslam
   DESTINATION lib/${PROJECT_NAME})
 
   
+# Tf listener
+add_executable(tf_listener src/tf_listener.cpp)
+ament_target_dependencies(
+  tf_listener
+    geometry_msgs
+    rclcpp
+    tf2
+    tf2_ros
+    nav_msgs
+)
+
+install(TARGETS
+tf_listener
+    DESTINATION lib/${PROJECT_NAME})
+
+
 
 
 #---------------------------- Convertitore tf ----------------------------

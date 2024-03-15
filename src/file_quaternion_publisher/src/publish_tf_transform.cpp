@@ -5,10 +5,16 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <tf2_ros/buffer.h>
+#include "nav_msgs/msg/odometry.hpp"
 
 using namespace std;
 using namespace rclcpp;
 
+void shutdown_handler(int signal) {
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Received signal: %d. Shutting down...", signal);
+    rclcpp::shutdown();
+}
 
 int main(int argc, char *argv[])
 {
@@ -17,6 +23,8 @@ int main(int argc, char *argv[])
   rclcpp::init(argc, argv);
 
   auto node = std::make_shared<rclcpp::Node>("publish_tf_orbslam");
+      signal(SIGINT, shutdown_handler);
+
 
   // Check parametri
   if (argc <= 1) {
@@ -34,7 +42,7 @@ int main(int argc, char *argv[])
       return 1;
   }
 
-  float RATE = 20.0;
+  float RATE = 14.0;
   int tempo_sleep=(1/RATE)*1000;  // in millisecondi
 
   if (argc==3){
@@ -43,9 +51,13 @@ int main(int argc, char *argv[])
   std::cout << "tempo_sleep: " << tempo_sleep << std::endl;
 
   auto tf_pub = node->create_publisher<tf2_msgs::msg::TFMessage>("/tf", 10);
+  auto odometry_originale = node->create_publisher<nav_msgs::msg::Odometry>("/odom_orbslam", 10);
+  
 
   // Lettura e pubblicazione
   std::string line;
+  double old_timestamp_double = -1;
+
   while (std::getline(file, line)) {
     std::istringstream iss(line);
     double timestamp_double;
@@ -53,7 +65,7 @@ int main(int argc, char *argv[])
     Eigen::Quaternionf q;
     Eigen::Vector3f twc;
     std::istringstream ss(line);
-    ss >> timestamp_double >> twc(0) >> twc(1) >> twc(2) >> q.x() >> q.y() >> q.z() >> q.w() ;
+    ss >> timestamp_double >> twc(0) >> twc(1) >> twc(2) >> q.x() >> q.y() >> q.z() >> q.w() ;  // Simula chiamata di track orbslam
     
     geometry_msgs::msg::TransformStamped transform;
     transform.header.stamp = Time(timestamp_double);;
@@ -71,6 +83,20 @@ int main(int argc, char *argv[])
     tf2_msgs::msg::TFMessage tf_msg;
     tf_msg.transforms.push_back(transform);
     tf_pub->publish(tf_msg);
+
+
+    nav_msgs::msg::Odometry odom;
+    odom.header = transform.header;
+    odom.child_frame_id = transform.child_frame_id;
+    odom.pose.pose.position.x = transform.transform.translation.x;
+    odom.pose.pose.position.y = transform.transform.translation.y;
+    odom.pose.pose.position.z = transform.transform.translation.z;
+    odom.pose.pose.orientation.x = transform.transform.rotation.x;
+    odom.pose.pose.orientation.y = transform.transform.rotation.y;
+    odom.pose.pose.orientation.z = transform.transform.rotation.z;
+    odom.pose.pose.orientation.w = transform.transform.rotation.w;
+    odometry_originale->publish(odom);
+
 
     sleep_for(std::chrono::milliseconds(tempo_sleep));
 
