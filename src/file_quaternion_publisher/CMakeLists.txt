@@ -64,31 +64,31 @@ install(TARGETS from_ros2_images_imu_to_png_csv
   DESTINATION lib/${PROJECT_NAME})
 
 # Check odometry uguale 
-add_executable(check_odometry_uguale src/check_odometry_uguale.cpp)
-target_include_directories(check_odometry_uguale PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(check_odometry_uguale rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
-install(TARGETS check_odometry_uguale
-  DESTINATION lib/${PROJECT_NAME})
+# add_executable(check_odometry_uguale src/check_odometry_uguale.cpp)
+# target_include_directories(check_odometry_uguale PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>)
+# ament_target_dependencies(check_odometry_uguale rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
+# install(TARGETS check_odometry_uguale
+#   DESTINATION lib/${PROJECT_NAME})
 
 # Estrattore odometry
-add_executable(odometry_to_file src/odometry_to_file.cpp)
-target_include_directories(odometry_to_file PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(odometry_to_file rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
-install(TARGETS odometry_to_file
-  DESTINATION lib/${PROJECT_NAME})
+# add_executable(odometry_to_file src/odometry_to_file.cpp)
+# target_include_directories(odometry_to_file PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>)
+# ament_target_dependencies(odometry_to_file rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
+# install(TARGETS odometry_to_file
+#   DESTINATION lib/${PROJECT_NAME})
   
 
 # Pubblicare orbslam pose as tf 
-add_executable(publish_tf_orbslam src/publish_tf_orbslam.cpp)
-target_include_directories(publish_tf_orbslam PUBLIC
+add_executable(publish_tf_transform src/publish_tf_transform.cpp)
+target_include_directories(publish_tf_transform PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(publish_tf_orbslam rclcpp sensor_msgs cv_bridge OpenCV nav_msgs tf2_ros tf2_geometry_msgs)
-install(TARGETS publish_tf_orbslam
+ament_target_dependencies(publish_tf_transform rclcpp sensor_msgs cv_bridge OpenCV nav_msgs tf2_ros tf2_geometry_msgs)
+install(TARGETS publish_tf_transform
   DESTINATION lib/${PROJECT_NAME})
 
   
@@ -144,13 +144,13 @@ tf_listener
 #   DESTINATION lib/${PROJECT_NAME})
 
 # # Pubblica tempo
-add_executable(publish_time src/publish_time.cpp)
-target_include_directories(publish_time PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(publish_time rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
-install(TARGETS publish_time
-  DESTINATION lib/${PROJECT_NAME})
+# add_executable(publish_time src/publish_time.cpp)
+# target_include_directories(publish_time PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>)
+# ament_target_dependencies(publish_time rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
+# install(TARGETS publish_time
+#   DESTINATION lib/${PROJECT_NAME})
 
 
 
