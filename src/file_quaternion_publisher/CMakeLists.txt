@@ -12,7 +12,7 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wall -Wextra -Wpedantic -O3)
 endif()
 
 # find dependencies
@@ -38,6 +38,18 @@ target_include_directories(file_quaternion_publisher PUBLIC
 ament_target_dependencies(file_quaternion_publisher rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
 
 install(TARGETS file_quaternion_publisher
+  DESTINATION lib/${PROJECT_NAME})
+
+
+# salva img da ros2 a file per calibrazione intrinsica
+add_executable(salva_immagini src/salva_immagini.cpp)
+target_include_directories(salva_immagini PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+ament_target_dependencies(salva_immagini rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
+
+install(TARGETS salva_immagini
   DESTINATION lib/${PROJECT_NAME})
 
 # Da IMU come messaggio ROS2  a file csv
