@@ -17,36 +17,40 @@ class ImageSubscriber : public rclcpp::Node
 public:
     ImageSubscriber() : Node("image_subscriber")
     {
+         rclcpp::QoS qos(rclcpp::KeepLast(10)); // Example QoS settings
+        qos.best_effort(); // Set QoS to best effort
+
         // Subscribe to the image topic
-       
         subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
             "/camera/left_image",
-            10,
+            qos,
             std::bind(&ImageSubscriber::image1_callback, this, std::placeholders::_1));
 
         // check if dir exists
-        if (directory_exists(main_dir))
+        if (directory_exists(main_dir) || directory_exists(camera_dir))
         {
             RCLCPP_ERROR(this->get_logger(), "Directory " + main_dir + " gia' esistenti! Cancellarle e riprovare");
             exit(1);
         }
- cv_bridge_ = std::make_shared<cv_bridge::CvImage>();
+// 
         // check if i can create directory
-        if (!create_directory(main_dir))
+        if (!create_directory(main_dir) || !create_directory(camera_dir)) 
         {
             RCLCPP_ERROR(this->get_logger(), "Failed to create directories for saving images.");
             exit(1);
         }
         // Initialize OpenCV window
-        cv::namedWindow("Left Image");
+        // cv::namedWindow("Left Image");
         /*cv::setMouseCallback(
             "Left Image", [](int event, int x, int y, int flags, void *userdata) {}, nullptr);*/
 
         // Initialize counter
-        counter_ = 0;
+        image_count_1 = 0;
 
         // Wait for spacebar input
-        cv::waitKey(0);
+        // cv::waitKey(0);
+
+         cv_bridge_ = std::make_shared<cv_bridge::CvImage>();
     }
 
 private:
@@ -63,13 +67,21 @@ private:
         }
 
         cv::imshow("Image Viewer", cv_bridge_->image);
-    cv::waitKey(1);
-        //std::string image_filename = main_dir + "/" + camera_name + "/" + sec + "." + nsec + ".png";
-        
-        //cv::imwrite(image_filename, cv_bridge_->image);
-        RCLCPP_INFO(this->get_logger(), "Saved left image:");
+        int key = cv::waitKey(10);
+        std::cout << "key=" << key<< std::endl;
+        if (key == 32) { // Space key
+            std::cout << "PREMUTO SPAZIO" << std::endl;
+            // std::string image_filename = main_dir + "/" + camera_name + "/" + sec + "." + nsec + ".png";
+            
+            std::string image_filename = camera_dir +"/" + std::to_string(image_count_1) + ".png";
+            cv::imwrite(image_filename, cv_bridge_->image);
+            RCLCPP_INFO(this->get_logger(), "Saved left image:");
+            image_count_1 ++;
+            
+        } else 
+            RCLCPP_INFO(this->get_logger(), "Foto left arrivata");
 
-        //image_count_1 ++;
+        //
     }
 
     bool create_directory(const std::string &dir)
@@ -87,9 +99,10 @@ private:
         return stat(dir.c_str(), &info) == 0 && S_ISDIR(info.st_mode);
     }
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_;
-    int counter_;
+    int image_count_1;
 
-    const std::string main_dir = "left_image";
+    const std::string main_dir = "images";
+    const std::string camera_dir = main_dir + "/left";
     
     std::shared_ptr<cv_bridge::CvImage> cv_bridge_;
 };
