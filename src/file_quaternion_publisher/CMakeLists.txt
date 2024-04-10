@@ -25,6 +25,7 @@ find_package(nav_msgs REQUIRED)
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(tf2_ros REQUIRED)  
 find_package(tf2_geometry_msgs REQUIRED)
+find_package(image_transport REQUIRED)
 
 
 # uncomment the following section in order to fill in
@@ -61,6 +62,15 @@ target_include_directories(from_ros2_images_imu_to_png_csv PUBLIC
   $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(from_ros2_images_imu_to_png_csv rclcpp sensor_msgs cv_bridge OpenCV nav_msgs)
 install(TARGETS from_ros2_images_imu_to_png_csv
+  DESTINATION lib/${PROJECT_NAME})
+
+# Estrattore da immagini COMPRESSE e imu con ROS2 a file PNG e csv 
+add_executable(from_ros2_images_compressed_imu_to_png_csv src/from_ros2_images_compressed_imu_to_png_csv.cpp)
+target_include_directories(from_ros2_images_compressed_imu_to_png_csv PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+ament_target_dependencies(from_ros2_images_compressed_imu_to_png_csv rclcpp sensor_msgs cv_bridge OpenCV nav_msgs image_transport)
+install(TARGETS from_ros2_images_compressed_imu_to_png_csv
   DESTINATION lib/${PROJECT_NAME})
 
 # Check odometry uguale 
