@@ -15,6 +15,8 @@
 
 using namespace std::chrono_literals;
 
+int64_t global_timestamp = 0; 
+
 class ImageSubscriber : public rclcpp::Node
 {
 public:
@@ -108,6 +110,7 @@ private:
         int64_t nsec = msg->header.stamp.nanosec;
         int64_t timestamp = sec * 1000000000 + nsec;
         
+        global_timestamp = timestamp;
 
         //std::string image_filename = main_dir + "/" + camera_name + "/" + sec + "." + nsec + ".png";
         std::string t = std::to_string(timestamp) ;
@@ -133,9 +136,14 @@ private:
             return;
         }
         
+        
         int64_t sec = msg->header.stamp.sec;
         int64_t nsec = msg->header.stamp.nanosec;
         int64_t timestamp = sec * 1000000000 + nsec;
+        if (timestamp == 0){
+            RCLCPP_INFO(this->get_logger(), "header timestamp nullo, uso global variable ");
+            timestamp = global_timestamp;
+        }
         
 
         //std::string image_filename = main_dir + "/" + camera_name + "/" + sec + "." + nsec + ".png";

@@ -91,18 +91,12 @@ public:
                          "Linear Acceleration X,Linear Acceleration Y,Linear Acceleration Z\n";
         }
 
-        
-
-
     }
 
 private:
 
-
     void image1_callback(const sensor_msgs::msg::Image::SharedPtr msg)
     {
-        
-
         try
         {
             cv_bridge_ = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
@@ -132,7 +126,6 @@ private:
      void image2_callback(const sensor_msgs::msg::Image::SharedPtr msg)
     {
         
-
         try
         {
             cv_bridge_ = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
